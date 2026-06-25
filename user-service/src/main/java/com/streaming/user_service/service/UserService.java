@@ -3,6 +3,7 @@ package com.streaming.user_service.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.streaming.user_service.dto.CreateUserRequest;
 import com.streaming.user_service.dto.UserResponse;
@@ -12,7 +13,6 @@ import com.streaming.user_service.exception.UserNotFoundException;
 import com.streaming.user_service.mapper.UserMapper;
 import com.streaming.user_service.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -41,7 +41,7 @@ public class UserService {
         return userMapper.toResponse(saved);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()
             .stream()
@@ -49,7 +49,7 @@ public class UserService {
             .toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("user not found: " + id));
 

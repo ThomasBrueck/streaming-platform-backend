@@ -6,10 +6,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
 @lombok.AllArgsConstructor
 @lombok.NoArgsConstructor
 @lombok.Getter

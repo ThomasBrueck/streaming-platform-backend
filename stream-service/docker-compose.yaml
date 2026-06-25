@@ -1,0 +1,15 @@
+services:
+  stream-db:
+    image: postgres:17-alpine
+    container_name: stream-db
+    environment:
+      POSTGRES_DB: streamdb
+      POSTGRES_USER: streamadmin
+      POSTGRES_PASSWORD: 123
+    ports:
+      - "5433:5432"
+    volumes:
+      - stream-db-data:/var/lib/postgresql/data
+
+volumes:
+  stream-db-data:
