@@ -1,7 +1,9 @@
 package com.streaming.user_service.controller;
 
+import java.net.http.HttpResponse;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +32,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         UserResponse userCreated = userService.createUser(request);
-        return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(userCreated);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userCreated);
     }
 
     @GetMapping

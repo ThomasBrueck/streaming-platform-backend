@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.streaming.user_service.dto.CreateUserRequest;
 import com.streaming.user_service.dto.UserResponse;
 import com.streaming.user_service.entity.User;
+import com.streaming.user_service.exception.DuplicatedResourceException;
+import com.streaming.user_service.exception.UserNotFoundException;
 import com.streaming.user_service.mapper.UserMapper;
 import com.streaming.user_service.repository.UserRepository;
 
@@ -26,11 +28,11 @@ public class UserService {
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByUsername(request.username())){
-            throw new IllegalArgumentException("username already taken");
+            throw new DuplicatedResourceException("username already exists");
         }
 
         if (userRepository.existsByEmail(request.email())){
-            throw new IllegalArgumentException("email already taken");
+            throw new DuplicatedResourceException("email already taken");
         }
 
         User user = userMapper.toEntity(request);
@@ -49,7 +51,7 @@ public class UserService {
 
     @Transactional
     public UserResponse getUserById(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("user not found: " + id));
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("user not found: " + id));
 
         return userMapper.toResponse(user);
     }
