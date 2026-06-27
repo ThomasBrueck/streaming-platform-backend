@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.streaming.stream_service.dto.CreateStreamRequest;
@@ -16,6 +17,7 @@ import com.streaming.stream_service.exception.StreamNotFoundException;
 import com.streaming.stream_service.mapper.StreamMapper;
 import com.streaming.stream_service.repository.StreamRepository;
 
+@Service
 public class StreamService {
     
     private final StreamRepository streamRepository;
