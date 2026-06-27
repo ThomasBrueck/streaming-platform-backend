@@ -80,6 +80,12 @@ public class StreamService {
         return streamResponse;
     }
 
+    @Transactional
+    public void deleteStreamsByUserId(Long userId) {
+        long deleted = streamRepository.deleteByUserId(userId);
+        System.out.println("deleted streams of user id: " + userId + ". Quantity: " + deleted);
+    }
+
 
 
 

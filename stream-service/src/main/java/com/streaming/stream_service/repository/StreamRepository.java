@@ -14,5 +14,7 @@ public interface StreamRepository extends JpaRepository<Stream, Long> {
 
     Optional<Stream> findByStreamKey(String streamKey);
 
-    boolean existsByStreamKey(String streamKey);   
+    boolean existsByStreamKey(String streamKey);
+    
+    long deleteByUserId(Long userId);
 }
