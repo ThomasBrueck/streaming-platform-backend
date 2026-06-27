@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.streaming.user_service.dto.CreateUserRequest;
 import com.streaming.user_service.dto.UserResponse;
 import com.streaming.user_service.entity.User;
+import com.streaming.user_service.event.UserEventPublisher;
 import com.streaming.user_service.exception.DuplicatedResourceException;
 import com.streaming.user_service.exception.UserNotFoundException;
 import com.streaming.user_service.mapper.UserMapper;
@@ -19,10 +20,20 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserEventPublisher userEventPublisher;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, UserEventPublisher userEventPublisher) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.userEventPublisher = userEventPublisher;
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("user not found: " + id));
+
+        userRepository.delete(user);
+        userEventPublisher.publisherUserDeleted(id);
     }
 
     @Transactional
