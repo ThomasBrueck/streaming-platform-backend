@@ -33,7 +33,7 @@ public class UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("user not found: " + id));
 
         userRepository.delete(user);
-        userEventPublisher.publisherUserDeleted(id);
+        userEventPublisher.publishUserDeleted(id);
     }
 
     @Transactional
