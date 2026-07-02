@@ -2,7 +2,6 @@ package com.streaming.stream_service.service;
 
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -10,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.streaming.stream_service.dto.CreateStreamRequest;
 import com.streaming.stream_service.dto.StreamResponse;
-import com.streaming.stream_service.dto.UpdateStreamStatusRequest;
 import com.streaming.stream_service.entity.Stream;
 import com.streaming.stream_service.enums.StreamStatus;
 import com.streaming.stream_service.exception.StreamNotFoundException;

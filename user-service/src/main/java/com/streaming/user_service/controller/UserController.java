@@ -1,10 +1,8 @@
 package com.streaming.user_service.controller;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +17,6 @@ import com.streaming.user_service.dto.UserResponse;
 import com.streaming.user_service.service.UserService;
 
 import jakarta.validation.Valid;
-import jakarta.ws.rs.core.Response;
 
 @RestController
 @RequestMapping("/api/users")

@@ -13,7 +13,7 @@ public class UserEventPublisher {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void publisherUserDeleted(Long userId) {
+    public void publishUserDeleted(Long userId) {
         kafkaTemplate.send(TOPIC, new UserDeletedEvent(userId));
     }
 }
