@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 public class UserEventPublisher {
     private static final String TOPIC = "user-events";
 
-    private final KafkaTemplate<String, UserDeletedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public UserEventPublisher(KafkaTemplate<String, UserDeletedEvent> kafkaTemplate) {
+    public UserEventPublisher(KafkaTemplate<String, Object> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
