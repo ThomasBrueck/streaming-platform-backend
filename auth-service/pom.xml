@@ -42,7 +42,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Web + JPA + validación -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -62,7 +61,6 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<!-- Postgres + Flyway (igual que en tus otros servicios) -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -86,19 +84,19 @@
 			<artifactId>spring-boot-flyway</artifactId>
 		</dependency>
 
-		<!-- Lombok + Eureka -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>1.18.46</version>
 			<scope>compile</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 			<version>5.0.2</version>
 		</dependency>
-		<!-- Lombok + Eureka -->
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -112,13 +110,11 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<!-- 🆕 Hash de contraseñas (BCrypt) -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
-		<!-- 🆕 JWT (crear y firmar tokens) -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
@@ -135,6 +131,11 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.12.6</version>
 			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-kafka</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

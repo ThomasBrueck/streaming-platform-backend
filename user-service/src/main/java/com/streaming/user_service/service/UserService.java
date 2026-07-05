@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.streaming.user_service.dto.CreateUserRequest;
 import com.streaming.user_service.dto.UserResponse;
 import com.streaming.user_service.entity.User;
+import com.streaming.user_service.event.UserCreatedEvent;
 import com.streaming.user_service.event.UserEventPublisher;
 import com.streaming.user_service.exception.DuplicatedResourceException;
 import com.streaming.user_service.exception.UserNotFoundException;
@@ -36,8 +36,9 @@ public class UserService {
         userEventPublisher.publishUserDeleted(id);
     }
 
+    // main function: Listener for create user event from auth microservice
     @Transactional
-    public UserResponse createUser(CreateUserRequest request) {
+    public UserResponse createUser(UserCreatedEvent request) {
         if (userRepository.existsByUsername(request.username())){
             throw new DuplicatedResourceException("username already exists");
         }

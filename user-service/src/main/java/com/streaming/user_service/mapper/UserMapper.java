@@ -2,15 +2,16 @@ package com.streaming.user_service.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.streaming.user_service.dto.CreateUserRequest;
 import com.streaming.user_service.dto.UserResponse;
 import com.streaming.user_service.entity.User;
+import com.streaming.user_service.event.UserCreatedEvent;
 
 @Component
 public class UserMapper {
 
-    public User toEntity(CreateUserRequest request) {
+    public User toEntity(UserCreatedEvent request) {
         User user = new User();
+        user.setId(request.userId());
         user.setUsername(request.username());
         user.setEmail(request.email());
         user.setDisplayName(request.displayName());

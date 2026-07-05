@@ -1,6 +1,5 @@
 package com.streaming.auth_service.exception;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;

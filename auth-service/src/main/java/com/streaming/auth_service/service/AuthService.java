@@ -1,5 +1,6 @@
 package com.streaming.auth_service.service;
 
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,8 @@ import com.streaming.auth_service.dto.LoginResponse;
 import com.streaming.auth_service.dto.RegisterRequest;
 import com.streaming.auth_service.entity.AuthUser;
 import com.streaming.auth_service.enums.Role;
+import com.streaming.auth_service.event.AuthEventPublisher;
+import com.streaming.auth_service.event.UserCreatedEvent;
 import com.streaming.auth_service.exception.DuplicatedResourceException;
 import com.streaming.auth_service.exception.InvalidInputException;
 import com.streaming.auth_service.mapper.AuthUserMapper;
@@ -22,12 +25,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthUserMapper authUserMapper;
     private final JwtService jwtService;
+    private final AuthEventPublisher authEventPublisher;
 
-    public AuthService(AuthUserRepository authUserRepository, PasswordEncoder passwordEncoder, AuthUserMapper authUserMapper, JwtService jwtService) {
+    public AuthService(AuthUserRepository authUserRepository, PasswordEncoder passwordEncoder, AuthUserMapper authUserMapper, JwtService jwtService, AuthEventPublisher authEventPublisher) {
         this.authUserRepository = authUserRepository;
         this.passwordEncoder = passwordEncoder;
         this.authUserMapper = authUserMapper;
         this.jwtService = jwtService;
+        this.authEventPublisher = authEventPublisher;
     }
 
     @Transactional
@@ -51,6 +56,7 @@ public class AuthService {
         authUser.setRole(Role.USER.toString());
 
         AuthUser saved = authUserRepository.save(authUser);
+        authEventPublisher.userCreated(new UserCreatedEvent(saved.getId(), saved.getEmail(), saved.getUsername(), null, saved.getCreatedAt()));
 
         return authUserMapper.toResponse(saved);
     }
