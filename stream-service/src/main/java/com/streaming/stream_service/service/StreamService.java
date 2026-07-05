@@ -12,6 +12,7 @@ import com.streaming.stream_service.dto.StreamResponse;
 import com.streaming.stream_service.entity.Stream;
 import com.streaming.stream_service.enums.StreamStatus;
 import com.streaming.stream_service.exception.StreamNotFoundException;
+import com.streaming.stream_service.exception.UnauthorizedMethod;
 import com.streaming.stream_service.mapper.StreamMapper;
 import com.streaming.stream_service.repository.StreamRepository;
 
@@ -27,12 +28,10 @@ public class StreamService {
     }
 
     @Transactional
-    public StreamResponse createStream(CreateStreamRequest request) {
-        Stream stream = streamMapper.toEntity(request);
+    public StreamResponse createStream(CreateStreamRequest request, Long userId) {
+        Stream stream = streamMapper.toEntity(request, userId);
 
-        stream.setStatus(StreamStatus.OFFLINE);
         stream.setStreamKey(generateStreamKey());
-        stream.setViewerCount(0);
 
         Stream saved = streamRepository.save(stream);
         return streamMapper.toResponse(saved);
@@ -43,8 +42,12 @@ public class StreamService {
     }
 
     @Transactional
-    public StreamResponse updateStreamStatusById(Long id, StreamStatus status) {
+    public StreamResponse updateStreamStatusById(Long id, StreamStatus status, Long userId) {
         Stream stream = streamRepository.findById(id).orElseThrow(() -> new StreamNotFoundException("stream not found: " + id));
+
+        if (!stream.getUserId().equals(userId)) {
+            throw new UnauthorizedMethod("you don't have permission to do this");
+        }
 
         stream.setStatus(status);
         streamRepository.save(stream);

@@ -10,6 +10,7 @@ import com.streaming.user_service.entity.User;
 import com.streaming.user_service.event.UserCreatedEvent;
 import com.streaming.user_service.event.UserEventPublisher;
 import com.streaming.user_service.exception.DuplicatedResourceException;
+import com.streaming.user_service.exception.UnauthorizedMethod;
 import com.streaming.user_service.exception.UserNotFoundException;
 import com.streaming.user_service.mapper.UserMapper;
 import com.streaming.user_service.repository.UserRepository;
@@ -29,7 +30,11 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id, Long requestUserId, String requestUserRole) {
+        if (!requestUserId.equals(id) && !requestUserRole.equals("ADMIN")) {
+            throw new UnauthorizedMethod("you don't have permission to do this");
+        }
+
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("user not found: " + id));
 
         userRepository.delete(user);

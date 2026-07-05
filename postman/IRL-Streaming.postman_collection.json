@@ -1,0 +1,363 @@
+{
+	"info": {
+		"_postman_id": "53a0185f-f810-4184-ae09-8cac1a25a6d5",
+		"name": "IRL-Streaming",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44330204",
+		"_collection_link": "https://thomasbrueck.postman.co/workspace/Thomas-Brueck's-Workspace~dee87767-b11d-4023-8efe-41705b360b59/collection/44330204-53a0185f-f810-4184-ae09-8cac1a25a6d5?action=share&source=collection_link&creator=44330204"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"prueba2\",\n  \"email\": \"prueba2@test.com\",\n  \"password\": \"123456\",\n  \"passwordConfirm\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"prueba@test.com\",\n    \"password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Get Users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI4NDk3NiwiZXhwIjoxNzgzMjk1Nzc2fQ._mHwJzCldTUAjHFH4y13O__KzDq7q6YbkZuZS79jJUFBH9yqeBmGCiIxPcDTHi8wYlEBIZBXgg-WYXnpajXAZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@test.com\",\n  \"password\": \"123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI4NDk3NiwiZXhwIjoxNzgzMjk1Nzc2fQ._mHwJzCldTUAjHFH4y13O__KzDq7q6YbkZuZS79jJUFBH9yqeBmGCiIxPcDTHi8wYlEBIZBXgg-WYXnpajXAZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/users/4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI4NDk3NiwiZXhwIjoxNzgzMjk1Nzc2fQ._mHwJzCldTUAjHFH4y13O__KzDq7q6YbkZuZS79jJUFBH9yqeBmGCiIxPcDTHi8wYlEBIZBXgg-WYXnpajXAZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/users/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"users",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stream",
+			"item": [
+				{
+					"name": "Create Stream",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI4NDk3NiwiZXhwIjoxNzgzMjk1Nzc2fQ._mHwJzCldTUAjHFH4y13O__KzDq7q6YbkZuZS79jJUFBH9yqeBmGCiIxPcDTHi8wYlEBIZBXgg-WYXnpajXAZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"My First Stream\",\n  \"description\": \"Streaming test\",\n  \"category\": \"Just Talking\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/streams",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"streams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Streams",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI4NDk3NiwiZXhwIjoxNzgzMjk1Nzc2fQ._mHwJzCldTUAjHFH4y13O__KzDq7q6YbkZuZS79jJUFBH9yqeBmGCiIxPcDTHi8wYlEBIZBXgg-WYXnpajXAZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/streams",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"streams"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Stream By Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI4NDk3NiwiZXhwIjoxNzgzMjk1Nzc2fQ._mHwJzCldTUAjHFH4y13O__KzDq7q6YbkZuZS79jJUFBH9yqeBmGCiIxPcDTHi8wYlEBIZBXgg-WYXnpajXAZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/streams/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"streams",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Stream By User Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI4NDk3NiwiZXhwIjoxNzgzMjk1Nzc2fQ._mHwJzCldTUAjHFH4y13O__KzDq7q6YbkZuZS79jJUFBH9yqeBmGCiIxPcDTHi8wYlEBIZBXgg-WYXnpajXAZA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/streams/user/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"streams",
+								"user",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Stream Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2IiwidXNlcm5hbWUiOiJwcnVlYmEiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc4MzI5NDIzNSwiZXhwIjoxNzgzMzA1MDM1fQ.r-YHKxn-MfP8xtD3Nk6ftuy1iSc3l64NWNOOkF1z3I_9SRibvJTSTrbVVEGXxsKfC5t0Lz2vHOquBneCR0hkog",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"LIVE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/streams/1/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"streams",
+								"1",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
