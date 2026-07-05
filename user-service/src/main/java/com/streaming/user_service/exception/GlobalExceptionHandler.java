@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.streaming.user_service.dto.ErrorResponse;
 
+import jakarta.ws.rs.core.Response;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -26,5 +28,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidInput(InvalidInputException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedMethod.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedMethod(UnauthorizedMethod ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
 }

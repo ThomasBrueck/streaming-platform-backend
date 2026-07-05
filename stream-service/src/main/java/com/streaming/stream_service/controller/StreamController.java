@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,8 +30,8 @@ public class StreamController {
     }
 
     @PostMapping
-    public ResponseEntity<StreamResponse> createStream(@Valid @RequestBody CreateStreamRequest request) {
-        StreamResponse streamCreated = streamService.createStream(request);
+    public ResponseEntity<StreamResponse> createStream(@Valid @RequestBody CreateStreamRequest request, @RequestHeader("user_id") Long requestUserId) {
+        StreamResponse streamCreated = streamService.createStream(request, requestUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(streamCreated);
     }
 
@@ -50,7 +51,7 @@ public class StreamController {
     }
 
     @PatchMapping("/{id}/status")
-    public StreamResponse updateStatus(@PathVariable Long id, @Valid @RequestBody UpdateStreamStatusRequest request) {
-        return streamService.updateStreamStatusById(id, request.status());
+    public StreamResponse updateStatus(@PathVariable Long id, @Valid @RequestBody UpdateStreamStatusRequest request, @RequestHeader("user_id") Long requestUserId) {
+        return streamService.updateStreamStatusById(id, request.status(), requestUserId);
     }
 }

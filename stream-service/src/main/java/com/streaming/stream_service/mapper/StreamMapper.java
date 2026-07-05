@@ -5,17 +5,20 @@ import org.springframework.stereotype.Component;
 import com.streaming.stream_service.dto.CreateStreamRequest;
 import com.streaming.stream_service.dto.StreamResponse;
 import com.streaming.stream_service.entity.Stream;
+import com.streaming.stream_service.enums.StreamStatus;
 
 @Component
 public class StreamMapper {
     
-    public Stream toEntity(CreateStreamRequest request) {
+    public Stream toEntity(CreateStreamRequest request, Long userId) {
         Stream stream = new Stream();
 
-        stream.setUserId(request.userId());
+        stream.setUserId(userId);
         stream.setTitle(request.title());
         stream.setDescription(request.description());
         stream.setCategory(request.category());
+        stream.setStatus(StreamStatus.LIVE);
+        stream.setViewerCount(0);
 
         return stream;
     }
