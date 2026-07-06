@@ -16,4 +16,5 @@ public class UserEventPublisher {
     public void publishUserDeleted(Long userId) {
         kafkaTemplate.send(TOPIC, new UserDeletedEvent(userId));
     }
+
 }

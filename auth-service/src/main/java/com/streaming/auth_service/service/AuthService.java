@@ -1,6 +1,7 @@
 package com.streaming.auth_service.service;
 
 
+import org.bouncycastle.jcajce.provider.asymmetric.ec.GMSignatureSpi.sha256WithSM2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,5 +71,9 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
         return new LoginResponse(token);
+    }
+
+    public void deleteUser(Long userId) {
+        authUserRepository.deleteById(userId);
     }
 }
