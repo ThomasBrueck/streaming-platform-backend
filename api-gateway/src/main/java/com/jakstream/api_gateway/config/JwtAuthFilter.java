@@ -23,7 +23,8 @@ public class JwtAuthFilter implements GlobalFilter {
 
     private static final List<String> PUBLIC_PATHS = List.of(
         "/api/auth/register",
-        "/api/auth/login"
+        "/api/auth/login",
+        "/api/streams"
     );
 
     private final SecretKey key;
