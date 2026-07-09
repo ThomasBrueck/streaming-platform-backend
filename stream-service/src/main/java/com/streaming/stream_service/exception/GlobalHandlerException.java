@@ -12,16 +12,16 @@ import jakarta.ws.rs.core.Response;
 @RestControllerAdvice
 public class GlobalHandlerException {
 
-    @ExceptionHandler(StreamNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleStreamNotFound(StreamNotFoundException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
+  @ExceptionHandler(StreamNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleStreamNotFound(StreamNotFoundException ex) {
+    ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND.value());
+    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+  }
 
-    @ExceptionHandler(UnauthorizedMethod.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedMethod(UnauthorizedMethod ex) {
-        ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
-        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
-    }
-    
+  @ExceptionHandler(UnauthorizedMethod.class)
+  public ResponseEntity<ErrorResponse> handleUnauthorizedMethod(UnauthorizedMethod ex) {
+    ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED.value());
+    return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+  }
+
 }
