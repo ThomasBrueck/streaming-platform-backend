@@ -57,7 +57,7 @@ public class AuthService {
         authUser.setRole(Role.USER.toString());
 
         AuthUser saved = authUserRepository.save(authUser);
-        authEventPublisher.userCreated(new UserCreatedEvent(saved.getId(), saved.getEmail(), saved.getUsername(), null, saved.getCreatedAt()));
+        authEventPublisher.userCreated(new UserCreatedEvent(saved.getId(), saved.getEmail(), saved.getUsername(), request.displayName(), saved.getCreatedAt()));
 
         return authUserMapper.toResponse(saved);
     }
