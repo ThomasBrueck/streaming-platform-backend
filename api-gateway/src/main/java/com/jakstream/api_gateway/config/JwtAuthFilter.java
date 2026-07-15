@@ -23,8 +23,7 @@ public class JwtAuthFilter implements GlobalFilter {
 
     private static final List<String> PUBLIC_PATHS = List.of(
         "/api/auth/register",
-        "/api/auth/login",
-        "/api/streams"
+        "/api/auth/login"
     );
 
     private final SecretKey key;
@@ -36,8 +35,9 @@ public class JwtAuthFilter implements GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+        String method = exchange.getRequest().getMethod().name();
 
-        if (isPublicPath(path)) {
+        if (isPublicPath(path, method)) {
             return chain.filter(exchange);
         }
 
@@ -74,8 +74,14 @@ public class JwtAuthFilter implements GlobalFilter {
         }
     }
 
-    private boolean isPublicPath(String path) {
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+    private boolean isPublicPath(String path, String method) {
+        if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
+            return true;
+        }
+        if (path.startsWith("/api/streams") && "GET".equals(method)) {
+            return true;
+        }
+        return false;
     }
     
 }
