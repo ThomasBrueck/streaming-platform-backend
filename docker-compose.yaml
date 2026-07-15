@@ -131,6 +131,18 @@ services:
       - stream-db
       - kafka
 
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit
+    ports:
+      - "7880:7880"
+      - "7881:7881/udp"
+      - "7881:7881/tcp"
+      - "7882:7882/udp"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+    command: --config /etc/livekit.yaml
+
   chat-service:
     build: ./chat-service
     container_name: chat-service
