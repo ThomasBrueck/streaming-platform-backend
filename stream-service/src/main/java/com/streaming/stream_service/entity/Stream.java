@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.streaming.stream_service.enums.StreamCategory;
 import com.streaming.stream_service.enums.StreamStatus;
 
 import jakarta.persistence.Column;
@@ -36,8 +37,9 @@ public class Stream {
     @Column(length = 500)
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 100)
-    private String category;
+    private StreamCategory category;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

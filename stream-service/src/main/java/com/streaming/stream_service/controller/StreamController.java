@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.streaming.stream_service.dto.CreateStreamRequest;
+import com.streaming.stream_service.dto.LiveKitTokenRequest;
+import com.streaming.stream_service.dto.LiveKitTokenResponse;
 import com.streaming.stream_service.dto.StreamResponse;
+import com.streaming.stream_service.dto.UpdateStreamRequest;
 import com.streaming.stream_service.dto.UpdateStreamStatusRequest;
 import com.streaming.stream_service.service.StreamService;
 
@@ -53,5 +56,26 @@ public class StreamController {
     @PatchMapping("/{id}/status")
     public StreamResponse updateStatus(@PathVariable Long id, @Valid @RequestBody UpdateStreamStatusRequest request, @RequestHeader("user_id") Long requestUserId) {
         return streamService.updateStreamStatusById(id, request.status(), requestUserId);
+    }
+
+    /** Lets the owner edit their channel's title/description/category — there is only ever one. */
+    @PatchMapping("/{id}")
+    public StreamResponse updateStream(@PathVariable Long id, @Valid @RequestBody UpdateStreamRequest request, @RequestHeader("user_id") Long requestUserId) {
+        return streamService.updateStream(id, request, requestUserId);
+    }
+
+    /**
+     * Issues a scoped LiveKit access token for this stream's room. This is the
+     * ONLY way a client obtains WebRTC credentials — the LiveKit secret never
+     * reaches the browser. Publish rights are granted only to the stream owner.
+     */
+    @PostMapping("/{id}/token")
+    public LiveKitTokenResponse createLiveKitToken(
+        @PathVariable Long id,
+        @RequestHeader("user_id") Long requestUserId,
+        @RequestBody(required = false) LiveKitTokenRequest request
+    ) {
+        String displayName = request != null ? request.displayName() : null;
+        return streamService.createLiveKitToken(id, requestUserId, displayName);
     }
 }

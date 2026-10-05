@@ -24,4 +24,10 @@ public class GlobalHandlerException {
     return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
   }
 
+  @ExceptionHandler(DuplicateStreamException.class)
+  public ResponseEntity<ErrorResponse> handleDuplicateStream(DuplicateStreamException ex) {
+    ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT.value());
+    return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+  }
+
 }
