@@ -120,6 +120,14 @@
 			<artifactId>spring-boot-starter-kafka</artifactId>
 		</dependency>
 
+		<!-- In-memory DB so contextLoads/unit tests run without external infra -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>2.3.232</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

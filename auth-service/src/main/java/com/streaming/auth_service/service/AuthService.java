@@ -1,7 +1,8 @@
 package com.streaming.auth_service.service;
 
 
-import org.bouncycastle.jcajce.provider.asymmetric.ec.GMSignatureSpi.sha256WithSM2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,8 @@ import com.streaming.auth_service.repository.AuthUserRepository;
 
 @Service
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final AuthUserRepository authUserRepository;
     private final PasswordEncoder passwordEncoder;
@@ -73,7 +76,16 @@ public class AuthService {
         return new LoginResponse(token);
     }
 
+    /**
+     * Triggered by the "user-events" Kafka consumer (UserDeletedEvent). Kafka
+     * delivers at-least-once, so this must be idempotent against redelivery.
+     */
+    @Transactional
     public void deleteUser(Long userId) {
+        if (!authUserRepository.existsById(userId)) {
+            log.info("user {} already deleted, skipping (idempotent)", userId);
+            return;
+        }
         authUserRepository.deleteById(userId);
     }
 }

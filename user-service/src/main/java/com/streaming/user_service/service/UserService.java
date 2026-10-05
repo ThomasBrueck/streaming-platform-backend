@@ -2,6 +2,8 @@ package com.streaming.user_service.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,8 @@ import com.streaming.user_service.repository.UserRepository;
 
 @Service
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -42,8 +46,15 @@ public class UserService {
     }
 
     // main function: Listener for create user event from auth microservice
+    // Kafka delivers "auth-events" at-least-once, so redelivery of the same
+    // event must be a no-op instead of failing on the duplicate check below.
     @Transactional
     public UserResponse createUser(UserCreatedEvent request) {
+        if (userRepository.existsById(request.userId())) {
+            log.info("user profile {} already exists, skipping (idempotent)", request.userId());
+            return userMapper.toResponse(userRepository.findById(request.userId()).orElseThrow());
+        }
+
         if (userRepository.existsByUsername(request.username())){
             throw new DuplicatedResourceException("username already exists");
         }
