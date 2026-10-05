@@ -4,5 +4,6 @@ public record ChatMessage(
     String streamId,
     String userId,
     String username,
-    String content
+    String content,
+    String createdAt
 ) {}

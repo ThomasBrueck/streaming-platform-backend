@@ -1,5 +1,7 @@
 package com.streaming.chat_service.controller;
 
+import java.time.Instant;
+
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -18,6 +20,8 @@ public class ChatController {
 
     @MessageMapping("/chat/{streamId}")
     public void sendMessage(@DestinationVariable String streamId, @Payload ChatMessage message) {
-        chatProducer.sendMessage(streamId, message);
+        // Timestamp is always stamped here, server-side — never trust a client-supplied one.
+        ChatMessage stamped = new ChatMessage(streamId, message.userId(), message.username(), message.content(), Instant.now().toString());
+        chatProducer.sendMessage(streamId, stamped);
     }
 }
