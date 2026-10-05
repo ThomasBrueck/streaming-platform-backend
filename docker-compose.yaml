@@ -35,7 +35,7 @@ services:
     environment:
       POSTGRES_DB: userdb
       POSTGRES_USER: useradmin
-      POSTGRES_PASSWORD: 123
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
     ports:
       - "5432:5432"
     volumes:
@@ -47,7 +47,7 @@ services:
     environment:
       POSTGRES_DB: authdb
       POSTGRES_USER: authadmin
-      POSTGRES_PASSWORD: 123
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
     ports:
       - "5434:5432"
     volumes:
@@ -59,11 +59,23 @@ services:
     environment:
       POSTGRES_DB: streamdb
       POSTGRES_USER: streamadmin
-      POSTGRES_PASSWORD: 123
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
     ports:
       - "5433:5432"
     volumes:
       - stream-db-data:/var/lib/postgresql/data
+
+  chat-db:
+    image: postgres:17-alpine
+    container_name: chat-db
+    environment:
+      POSTGRES_DB: chatdb
+      POSTGRES_USER: chatadmin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123}
+    ports:
+      - "5435:5432"
+    volumes:
+      - chat-db-data:/var/lib/postgresql/data
 
   discovery-server:
     build: ./discovery-server
@@ -90,7 +102,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/userdb
       SPRING_DATASOURCE_USERNAME: useradmin
-      SPRING_DATASOURCE_PASSWORD: 123
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
@@ -106,7 +118,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
       SPRING_DATASOURCE_USERNAME: authadmin
-      SPRING_DATASOURCE_PASSWORD: 123
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       JWT_SECRET: ${JWT_SECRET}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
@@ -123,9 +135,12 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://stream-db:5432/streamdb
       SPRING_DATASOURCE_USERNAME: streamadmin
-      SPRING_DATASOURCE_PASSWORD: 123
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret-for-local-development-only-not-for-prod}
+      LIVEKIT_WS_URL: ${LIVEKIT_WS_URL:-ws://localhost:7880}
     depends_on:
       - discovery-server
       - stream-db
@@ -149,13 +164,18 @@ services:
     ports:
       - "8084:8084"
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://chat-db:5432/chatdb
+      SPRING_DATASOURCE_USERNAME: chatadmin
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       - discovery-server
+      - chat-db
       - kafka
 
 volumes:
   user-db-data:
   auth-db-data:
   stream-db-data:
+  chat-db-data:

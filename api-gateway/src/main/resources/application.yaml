@@ -21,10 +21,15 @@ spring:
               predicates:
                 - Path=/api/streams/**
 
-            - id: chat-service
+            - id: chat-service-ws
               uri: lb://CHAT-SERVICE
               predicates:
                 - Path=/ws/**
+
+            - id: chat-service-rest
+              uri: lb://CHAT-SERVICE
+              predicates:
+                - Path=/api/chat/**
 
 server:
   port: 8080

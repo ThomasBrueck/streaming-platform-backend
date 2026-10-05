@@ -8,6 +8,12 @@ rtc:
   tcp_port: 7881
   udp_port: 7882
 keys:
-  devkey: devsecret
+  # HS256 requires a key >= 256 bits (32 bytes) — a short word like "devsecret"
+  # is rejected by the JVM's JWT library, so the dev default must be long too.
+  devkey: devsecret-for-local-development-only-not-for-prod
+webhook:
+  api_key: devkey
+  urls:
+    - http://stream-service:8082/api/streams/webhook/livekit
 logging:
   level: info

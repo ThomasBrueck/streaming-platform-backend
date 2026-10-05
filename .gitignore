@@ -1,3 +1,10 @@
 .env
 
 irl-streaming-front/
+
+# Documentation and notes that are not part of the project (everything except the README)
+*.md
+!README.md
+claude/
+.claude/
+.impeccable/
