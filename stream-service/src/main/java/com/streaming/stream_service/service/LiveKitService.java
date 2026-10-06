@@ -117,12 +117,15 @@ public class LiveKitService {
             }
 
             String claimedHash = claims.get("sha256", String.class);
-            if (claimedHash != null) {
-                String actualHash = sha256Base64(rawBody);
-                if (!claimedHash.equals(actualHash)) {
-                    log.warn("livekit webhook rejected: body hash mismatch");
-                    return false;
-                }
+            if (claimedHash == null || claimedHash.isBlank()) {
+                log.warn("livekit webhook rejected: missing sha256 body-hash claim");
+                return false;
+            }
+
+            String actualHash = sha256Base64(rawBody);
+            if (!claimedHash.equals(actualHash)) {
+                log.warn("livekit webhook rejected: body hash mismatch");
+                return false;
             }
 
             return true;

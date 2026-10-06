@@ -91,14 +91,14 @@ services:
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:5173}
     depends_on:
       - discovery-server
 
   user-service:
     build: ./user-service
     container_name: user-service
-    ports:
-      - "8081:8081"
+    # No host ports — only reachable via the API gateway (prevents header spoofing)
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/userdb
       SPRING_DATASOURCE_USERNAME: useradmin
@@ -113,8 +113,7 @@ services:
   auth-service:
     build: ./auth-service
     container_name: auth-service
-    ports:
-      - "8083:8083"
+    # No host ports — only reachable via the API gateway
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
       SPRING_DATASOURCE_USERNAME: authadmin
@@ -130,8 +129,8 @@ services:
   stream-service:
     build: ./stream-service
     container_name: stream-service
-    ports:
-      - "8082:8082"
+    # No host ports — reached via the API gateway; LiveKit webhooks use the
+    # Docker network directly (http://stream-service:8082).
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://stream-db:5432/streamdb
       SPRING_DATASOURCE_USERNAME: streamadmin
@@ -161,13 +160,13 @@ services:
   chat-service:
     build: ./chat-service
     container_name: chat-service
-    ports:
-      - "8084:8084"
+    # No host ports — only reachable via the API gateway
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://chat-db:5432/chatdb
       SPRING_DATASOURCE_USERNAME: chatadmin
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      JWT_SECRET: ${JWT_SECRET}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       - discovery-server

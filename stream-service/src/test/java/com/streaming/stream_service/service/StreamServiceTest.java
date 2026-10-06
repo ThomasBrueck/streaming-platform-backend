@@ -16,11 +16,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.streaming.stream_service.dto.CreateStreamRequest;
 import com.streaming.stream_service.dto.LiveKitTokenResponse;
+import com.streaming.stream_service.dto.StreamPublicResponse;
 import com.streaming.stream_service.dto.StreamResponse;
+import com.streaming.stream_service.dto.UpdateStreamRequest;
 import com.streaming.stream_service.entity.Stream;
 import com.streaming.stream_service.enums.StreamCategory;
 import com.streaming.stream_service.enums.StreamStatus;
-import com.streaming.stream_service.dto.UpdateStreamRequest;
 import com.streaming.stream_service.exception.DuplicateStreamException;
 import com.streaming.stream_service.exception.StreamNotFoundException;
 import com.streaming.stream_service.exception.UnauthorizedMethod;
@@ -134,6 +135,19 @@ class StreamServiceTest {
 
         assertThatThrownBy(() -> streamService.updateStreamStatusById(1L, StreamStatus.OFFLINE, 99L))
             .isInstanceOf(UnauthorizedMethod.class);
+    }
+
+    @Test
+    void getStreamById_returnsPublicResponseWithoutStreamKey() {
+        Stream stream = sampleStream(1L, 42L);
+        when(streamRepository.findById(1L)).thenReturn(Optional.of(stream));
+
+        StreamPublicResponse response = streamService.getStreamById(1L);
+
+        assertThat(response.id()).isEqualTo(1L);
+        assertThat(response.title()).isEqualTo("My stream");
+        // StreamPublicResponse must NOT expose the stream key
+        assertThat(response).isInstanceOf(StreamPublicResponse.class);
     }
 
     @Test

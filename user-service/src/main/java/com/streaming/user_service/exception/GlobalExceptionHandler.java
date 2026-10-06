@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.streaming.user_service.dto.ErrorResponse;
 
-import jakarta.ws.rs.core.Response;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

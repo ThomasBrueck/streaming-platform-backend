@@ -41,3 +41,6 @@ eureka:
 
 jwt:
   secret: ${JWT_SECRET}
+
+cors:
+  allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}

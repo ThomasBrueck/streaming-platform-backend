@@ -1,7 +1,9 @@
 package com.streaming.stream_service.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,11 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.streaming.stream_service.dto.CreateStreamRequest;
 import com.streaming.stream_service.dto.LiveKitTokenRequest;
 import com.streaming.stream_service.dto.LiveKitTokenResponse;
+import com.streaming.stream_service.dto.StreamPublicResponse;
 import com.streaming.stream_service.dto.StreamResponse;
 import com.streaming.stream_service.dto.UpdateStreamRequest;
 import com.streaming.stream_service.dto.UpdateStreamStatusRequest;
@@ -39,17 +43,20 @@ public class StreamController {
     }
 
     @GetMapping
-    public List<StreamResponse> getAllStreams() {
-        return streamService.getAllStreams();
+    public Page<StreamPublicResponse> getAllStreams(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100), Sort.by("createdAt").descending());
+        return streamService.getAllStreams(pageable);
     }
 
     @GetMapping("/{id}")
-    public StreamResponse getStreamById(@PathVariable Long id) {
+    public StreamPublicResponse getStreamById(@PathVariable Long id) {
         return streamService.getStreamById(id);
     }
 
     @GetMapping("/user/{userId}")
-    public StreamResponse getStreamByUser(@PathVariable Long userId) {
+    public StreamPublicResponse getStreamByUser(@PathVariable Long userId) {
         return streamService.getStreamByUserId(userId);
     }
 

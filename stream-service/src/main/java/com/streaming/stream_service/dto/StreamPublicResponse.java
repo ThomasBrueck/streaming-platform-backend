@@ -6,17 +6,16 @@ import com.streaming.stream_service.enums.StreamCategory;
 import com.streaming.stream_service.enums.StreamStatus;
 
 /**
- * Full stream representation including the stream key — returned only to the
- * channel owner (create / update / status-change operations).
+ * Public-facing stream representation — never includes the stream key,
+ * which is a secret the owner uses for RTMP/LiveKit ingest.
  */
-public record StreamResponse (
+public record StreamPublicResponse(
     Long id,
     Long userId,
     String title,
     String description,
     StreamCategory category,
     StreamStatus status,
-    String streamKey,
     int viewerCount,
     LocalDateTime createdAt
 ) {}

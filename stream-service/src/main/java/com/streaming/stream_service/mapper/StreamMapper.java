@@ -3,6 +3,7 @@ package com.streaming.stream_service.mapper;
 import org.springframework.stereotype.Component;
 
 import com.streaming.stream_service.dto.CreateStreamRequest;
+import com.streaming.stream_service.dto.StreamPublicResponse;
 import com.streaming.stream_service.dto.StreamResponse;
 import com.streaming.stream_service.entity.Stream;
 import com.streaming.stream_service.enums.StreamCategory;
@@ -24,8 +25,9 @@ public class StreamMapper {
         return stream;
     }
 
+    /** Full response including the stream key — only for the channel owner. */
     public StreamResponse toResponse(Stream stream) {
-        StreamResponse streamResponse = new StreamResponse(
+        return new StreamResponse(
             stream.getId(),
             stream.getUserId(),
             stream.getTitle(),
@@ -36,7 +38,19 @@ public class StreamMapper {
             stream.getViewerCount(),
             stream.getCreatedAt()
         );
+    }
 
-        return streamResponse;
+    /** Public response — never exposes the stream key. */
+    public StreamPublicResponse toPublicResponse(Stream stream) {
+        return new StreamPublicResponse(
+            stream.getId(),
+            stream.getUserId(),
+            stream.getTitle(),
+            stream.getDescription(),
+            stream.getCategory(),
+            stream.getStatus(),
+            stream.getViewerCount(),
+            stream.getCreatedAt()
+        );
     }
 }

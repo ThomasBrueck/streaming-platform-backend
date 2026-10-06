@@ -1,16 +1,18 @@
 package com.streaming.stream_service.service;
 
 
-import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.streaming.stream_service.dto.CreateStreamRequest;
 import com.streaming.stream_service.dto.LiveKitTokenResponse;
+import com.streaming.stream_service.dto.StreamPublicResponse;
 import com.streaming.stream_service.dto.StreamResponse;
 import com.streaming.stream_service.dto.UpdateStreamRequest;
 import com.streaming.stream_service.entity.Stream;
@@ -95,27 +97,23 @@ public class StreamService {
     }
 
     @Transactional(readOnly = true)
-    public List<StreamResponse> getAllStreams() {
-        return streamRepository.findAll()
-            .stream()
-            .map(streamMapper::toResponse)
-            .toList();
+    public Page<StreamPublicResponse> getAllStreams(Pageable pageable) {
+        return streamRepository.findAll(pageable)
+            .map(streamMapper::toPublicResponse);
     }
 
     @Transactional(readOnly = true)
-    public StreamResponse getStreamById(Long id) {
-        Stream stream = streamRepository.findById(id).orElseThrow(() -> new StreamNotFoundException("stream not found: " + id));
-        StreamResponse streamResponse = streamMapper.toResponse(stream);
-
-        return streamResponse;
+    public StreamPublicResponse getStreamById(Long id) {
+        Stream stream = streamRepository.findById(id)
+            .orElseThrow(() -> new StreamNotFoundException("stream not found: " + id));
+        return streamMapper.toPublicResponse(stream);
     }
 
     @Transactional(readOnly = true)
-    public StreamResponse getStreamByUserId(Long userId) {
-        Stream stream = streamRepository.findByUserId(userId).orElseThrow(() -> new StreamNotFoundException("stream not found with user id: " + userId));
-        StreamResponse streamResponse = streamMapper.toResponse(stream);
-
-        return streamResponse;
+    public StreamPublicResponse getStreamByUserId(Long userId) {
+        Stream stream = streamRepository.findByUserId(userId)
+            .orElseThrow(() -> new StreamNotFoundException("stream not found with user id: " + userId));
+        return streamMapper.toPublicResponse(stream);
     }
 
     @Transactional

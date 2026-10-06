@@ -34,14 +34,24 @@ public class JwtAuthFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String path = exchange.getRequest().getURI().getPath();
-        String method = exchange.getRequest().getMethod().name();
+        // Always strip internal-only headers so a malicious client can never
+        // spoof an identity — even on public routes where no JWT is required.
+        ServerHttpRequest sanitized = exchange.getRequest().mutate().headers(headers -> {
+            headers.remove("user_id");
+            headers.remove("user_role");
+            headers.remove("X-User-Id");
+            headers.remove("X-User-Role");
+        }).build();
+        exchange = exchange.mutate().request(sanitized).build();
+
+        String path = sanitized.getURI().getPath();
+        String method = sanitized.getMethod().name();
 
         if (isPublicPath(path, method)) {
             return chain.filter(exchange);
         }
 
-        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        String authHeader = sanitized.getHeaders().getFirst("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -52,23 +62,19 @@ public class JwtAuthFilter implements GlobalFilter {
 
         try {
             Jws<Claims> claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-            
+
             String userId = claims.getPayload().getSubject();
             String role = claims.getPayload().get("role", String.class);
 
-            ServerHttpRequest modifiedRequest = exchange.getRequest().mutate().headers(
-                headers -> {
-                    headers.remove("Authorization");
-                    headers.remove("X-User-Id");
-                    headers.remove("X-User-Role");
-                    headers.add("user_id", userId);
-                    headers.add("user_role", role);
-                }).build();
-
+            ServerHttpRequest modifiedRequest = sanitized.mutate().headers(headers -> {
+                headers.remove("Authorization");
+                headers.add("user_id", userId);
+                headers.add("user_role", role);
+            }).build();
 
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
 
-        }  catch (Exception e) {
+        } catch (Exception e) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
@@ -79,6 +85,12 @@ public class JwtAuthFilter implements GlobalFilter {
             return true;
         }
         if (path.startsWith("/api/streams") && "GET".equals(method)) {
+            return true;
+        }
+        // WebSocket upgrade requests — browsers cannot attach custom headers to
+        // a WS handshake, so authentication is handled at the STOMP protocol
+        // level inside chat-service (StompAuthInterceptor).
+        if (path.startsWith("/ws/")) {
             return true;
         }
         return false;

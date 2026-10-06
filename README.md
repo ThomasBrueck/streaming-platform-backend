@@ -35,13 +35,13 @@ Rather than a monolith, it is deliberately built as a **distributed system** to 
 **Highlights**
 - 🧩 **6 independent microservices** coordinated by an API Gateway + Service Discovery.
 - 📨 **Asynchronous, event-driven communication** via Apache Kafka, with **idempotent consumers** (safe against at-least-once redelivery).
-- 🔐 **Stateless JWT authentication** enforced centrally at the gateway.
+- 🔐 **Stateless JWT authentication** enforced centrally at the gateway; **STOMP-level auth** for WebSocket chat; anti-spoofing header sanitization on every request.
 - 🎥 **Real-time video** through WebRTC (LiveKit SFU) — **access tokens are minted entirely server-side**; the media secret never reaches the browser.
-- 📊 **Live, accurate viewer counts**, driven by signature-verified LiveKit webhooks.
-- 💬 **Real-time chat with persisted history**, fanned out through Kafka.
+- 📊 **Live, accurate viewer counts**, driven by signature-verified LiveKit webhooks (body-hash required).
+- 💬 **Real-time chat with persisted history**, fanned out through Kafka; server-side identity — the client cannot impersonate another user.
 - 🐘 **Database-per-service** (4 databases) with PostgreSQL and Flyway-versioned schemas.
-- ✅ **Unit-tested service layer** (JUnit 5 + Mockito) that runs fully offline (H2), no external infra required.
-- 🐳 **One-command startup** — the entire stack (12 containers) runs with Docker Compose.
+- ✅ **38 unit tests** (JUnit 5 + Mockito + AssertJ) that run fully offline (H2), no external infra required. **CI via GitHub Actions**.
+- 🐳 **One-command startup** — the entire stack (12 containers) runs with Docker Compose. Internal services have no host ports — only the gateway is exposed.
 
 ---
 
@@ -164,11 +164,16 @@ to be a safe no-op on redelivery (`existsById` guards in `user-service.createUse
 ## 🔐 Security
 
 - **Stateless JWT** (HS256) issued by `auth-service` on login; tokens carry `sub` (user id), `username` and `role`, and expire in 3 hours.
-- **Centralized enforcement at the gateway** — a single global `JwtAuthFilter` validates every request. Downstream services trust the `user_id` / `user_role` headers the gateway injects, so they don't re-implement auth.
-- **Public routes** are explicitly whitelisted: `POST /api/auth/register`, `POST /api/auth/login`, and `GET /api/streams/**` (public catalog).
+- **Centralized enforcement at the gateway** — a single global `JwtAuthFilter` validates every REST request. Downstream services trust the `user_id` / `user_role` headers the gateway injects, so they don't re-implement auth.
+- **Anti-spoofing header sanitization** — `JwtAuthFilter` strips `user_id`, `user_role`, `X-User-Id` and `X-User-Role` from **every** incoming request (including public routes) before applying any other logic. A malicious client can never inject an identity header.
+- **WebSocket (STOMP) authentication** — browsers cannot send custom headers on a WebSocket handshake, so the gateway lets `/ws/**` through and `chat-service` validates JWTs at the STOMP protocol level (`StompAuthInterceptor`). The client passes its token via STOMP `connectHeaders`; the server reads `userId` and `username` from the verified claims — **chat identity is never trusted from the message payload**.
+- **No internal service ports exposed** — Docker Compose publishes only the API gateway (:8080), Eureka (:8761), Kafka (:9092), Kafka UI (:8090) and LiveKit media (:7880). Business services are reachable exclusively through the gateway (or, for LiveKit webhooks, via the internal Docker network). This prevents bypassing the JWT filter.
+- **Public routes** are explicitly whitelisted: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/streams/**` (public catalog), and `ws /ws/**` (STOMP-level auth).
 - **Passwords** are hashed with **BCrypt** (`spring-security-crypto`) — never stored in plaintext.
 - **Role-based authorization** (`USER` / `ADMIN`) — e.g. only the owner (or an admin) can delete an account or change a stream's status.
+- **No PII leaks** — public API responses never expose emails (removed from `UserResponse`) or stream keys (separate `StreamPublicResponse` for public endpoints). The stream key is returned only to the channel owner.
 - **Media credentials are never trusted from the client** — see [Media (LiveKit)](#-media-livekit) below.
+- **Webhook body-hash verification is mandatory** — the `sha256` claim in LiveKit webhook JWTs is required, not optional; a webhook call without it is rejected.
 
 ---
 
@@ -203,14 +208,21 @@ Schemas are versioned and applied automatically with **Flyway** (`src/main/resou
 
 ---
 
-## ✅ Testing
+## ✅ Testing & CI
 
-- **Unit tests** (JUnit 5 + Mockito + AssertJ) cover the service layer of `auth-service`, `user-service`
-  and `stream-service` — registration/login rules, ownership checks, idempotent event handling,
-  and LiveKit token scoping (owner vs. viewer).
-- Every service also ships an **H2-backed test profile** (`src/test/resources/application.properties`,
-  with Flyway/Eureka disabled), so `./mvnw test` — including the generated `contextLoads` smoke test —
-  runs **standalone, with zero external infrastructure**.
+**38 tests** across 4 services, all passing:
+
+| Service | Tests | What's covered |
+|---|---|---|
+| **auth-service** | 8 | Registration (duplicate username/email, password mismatch), login (wrong password, success), idempotent delete |
+| **user-service** | 8 | Idempotent profile creation from Kafka events, duplicate rejection, owner/admin authorization |
+| **stream-service** | 13 | Channel creation (key generation, duplicate rejection), ownership checks, status updates, pagination |
+| **stream-service (LiveKit)** | 7 | Token scoping (owner publishes / viewer can't), webhook signature + body-hash verification, identity determinism |
+| **chat-service** | 1 | Context-loads smoke test |
+
+- Every service ships an **H2-backed test profile** (`src/test/resources/application.properties`,
+  with Flyway/Eureka disabled), so `./mvnw test` runs **standalone, with zero external infrastructure**.
+- **GitHub Actions CI** runs `./mvnw verify` for each service in a matrix on every push/PR to `main`.
 
 ```bash
 cd stream-service && ./mvnw test   # or auth-service / user-service / chat-service
@@ -273,17 +285,18 @@ All requests go through the gateway (`http://localhost:8080`). Protected routes 
 ### Users — `user-service`
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `GET` | `/api/users` | JWT | List users |
-| `GET` | `/api/users/{id}` | JWT | Get a user |
+| `GET` | `/api/users?page=0&size=20` | JWT | Paginated user list (no emails in response) |
+| `GET` | `/api/users/{id}` | JWT | Get a user profile |
 | `DELETE` | `/api/users/{id}` | JWT (owner/admin) | Delete account (cascades via `user-events`) |
 
 ### Streams & media — `stream-service`
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `GET` | `/api/streams` | Public | Public catalog of streams |
-| `GET` | `/api/streams/{id}` | Public | Stream detail |
-| `GET` | `/api/streams/user/{userId}` | Public | Stream by user |
-| `POST` | `/api/streams` | JWT | Create a stream (title, description, category) |
+| `GET` | `/api/streams?page=0&size=20` | Public | Paginated public catalog (no stream keys) |
+| `GET` | `/api/streams/{id}` | Public | Stream detail (public response) |
+| `GET` | `/api/streams/user/{userId}` | Public | Stream by user (public response) |
+| `POST` | `/api/streams` | JWT | Create a stream (response includes stream key) |
+| `PATCH` | `/api/streams/{id}` | JWT (owner) | Update channel title/description/category |
 | `PATCH` | `/api/streams/{id}/status` | JWT (owner) | Toggle `LIVE` / `OFFLINE` |
 | `POST` | `/api/streams/{id}/token` | JWT | Get a scoped LiveKit access token (publish rights only for the owner) |
 | `POST` | `/api/streams/webhook/livekit` | Signed webhook (not user-facing) | LiveKit → viewer-count updates |
@@ -292,8 +305,8 @@ All requests go through the gateway (`http://localhost:8080`). Protected routes 
 | Method / Channel | Destination | Description |
 |---|---|---|
 | `GET` | `/api/chat/{streamId}/history` | Last 50 messages, oldest first |
-| STOMP endpoint | `/ws/chat` | WebSocket handshake |
-| Publish | `/app/chat/{streamId}` | Send a message |
+| STOMP endpoint | `/ws/chat` | WebSocket handshake (JWT passed via STOMP `connectHeaders`) |
+| Publish | `/app/chat/{streamId}` | Send a message (content only — identity is server-side) |
 | Subscribe | `/topic/stream/{streamId}` | Receive live messages |
 
 ---
@@ -313,11 +326,13 @@ All requests go through the gateway (`http://localhost:8080`). Protected routes 
 
 Honest view of what's next (this project is actively evolving):
 
-- [ ] **Integration tests with Testcontainers** (Postgres + Kafka) to validate the event flows end-to-end, complementing the existing mocked unit tests.
+- [x] ~~CI pipeline~~ — GitHub Actions runs tests per service on every push/PR.
+- [x] ~~Security hardening~~ — header sanitization, STOMP-level chat auth, PII removal from public responses, internal ports closed.
+- [ ] **Integration tests with Testcontainers** (Postgres + Kafka) to validate the event flows end-to-end.
 - [ ] **Rate-limit** chat and stream creation.
 - [ ] **Dead-letter topics + retry policy** for Kafka consumers.
 - [ ] **Observability** — structured logging, metrics (Micrometer/Prometheus) and distributed tracing.
-- [ ] **CI/CD pipeline** and Kubernetes manifests for cloud deployment.
+- [ ] Kubernetes manifests for cloud deployment.
 - [ ] Chat moderation, follows/subscriptions between users.
 
 ---
