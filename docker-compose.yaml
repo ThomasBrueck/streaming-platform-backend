@@ -1,3 +1,10 @@
+# Eureka defaults take ~1 minute to propagate a new instance to the gateway, during
+# which every request through it returns 503. Short intervals keep a cold start fast.
+x-eureka-client: &eureka-client
+  EUREKA_CLIENT_INITIALINSTANCEINFOREPLICATIONINTERVALSECONDS: "5"
+  EUREKA_CLIENT_REGISTRYFETCHINTERVALSECONDS: "5"
+  EUREKA_INSTANCE_LEASERENEWALINTERVALINSECONDS: "5"
+
 services:
   kafka:
     image: apache/kafka:3.9.0
@@ -27,7 +34,8 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     depends_on:
-      - kafka
+      kafka:
+        condition: service_started
 
   user-db:
     image: postgres:17-alpine
@@ -82,6 +90,14 @@ services:
     container_name: discovery-server
     ports:
       - "8761:8761"
+    environment:
+      EUREKA_SERVER_USEREADONLYRESPONSECACHE: "false"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8761/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
 
   api-gateway:
     build: ./api-gateway
@@ -89,11 +105,13 @@ services:
     ports:
       - "8080:8080"
     environment:
+      <<: *eureka-client
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       JWT_SECRET: ${JWT_SECRET}
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-http://localhost:5173}
     depends_on:
-      - discovery-server
+      discovery-server:
+        condition: service_healthy
 
   user-service:
     build: ./user-service
@@ -103,12 +121,16 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/userdb
       SPRING_DATASOURCE_USERNAME: useradmin
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
+      <<: *eureka-client
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - discovery-server
-      - user-db
-      - kafka
+      discovery-server:
+        condition: service_healthy
+      user-db:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   auth-service:
     build: ./auth-service
@@ -118,13 +140,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
       SPRING_DATASOURCE_USERNAME: authadmin
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
+      <<: *eureka-client
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       JWT_SECRET: ${JWT_SECRET}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - discovery-server
-      - auth-db
-      - kafka
+      discovery-server:
+        condition: service_healthy
+      auth-db:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   stream-service:
     build: ./stream-service
@@ -135,15 +161,19 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://stream-db:5432/streamdb
       SPRING_DATASOURCE_USERNAME: streamadmin
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
+      <<: *eureka-client
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-devkey}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-devsecret-for-local-development-only-not-for-prod}
       LIVEKIT_WS_URL: ${LIVEKIT_WS_URL:-ws://localhost:7880}
     depends_on:
-      - discovery-server
-      - stream-db
-      - kafka
+      discovery-server:
+        condition: service_healthy
+      stream-db:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   livekit:
     image: livekit/livekit-server:latest
@@ -165,13 +195,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://chat-db:5432/chatdb
       SPRING_DATASOURCE_USERNAME: chatadmin
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-123}
+      <<: *eureka-client
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
       JWT_SECRET: ${JWT_SECRET}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - discovery-server
-      - chat-db
-      - kafka
+      discovery-server:
+        condition: service_healthy
+      chat-db:
+        condition: service_started
+      kafka:
+        condition: service_started
 
 volumes:
   user-db-data:

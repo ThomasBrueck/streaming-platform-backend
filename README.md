@@ -260,6 +260,8 @@ docker compose up --build
 
 This starts **12 containers**: 4× PostgreSQL, Kafka + Kafka UI, LiveKit, the discovery server, the API gateway and the 4 business services.
 
+> **Cold start:** the gateway answers `503` until the services have registered with Eureka. The services wait for a healthy discovery server and refresh the registry every 5 s, so the stack is usable about 20–30 s after `up`. Data lives in named volumes; `docker compose down -v` wipes it.
+
 ### 3. Useful endpoints
 | Service | URL |
 |---|---|
